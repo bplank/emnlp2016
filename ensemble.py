@@ -35,8 +35,8 @@ if __name__ == '__main__':
       
   for argv in sys.argv[2:]:
     for i, scored_nbest in enumerate(generate_nbest(open_file(argv))):
-      for tree, score in scored_nbest.iteritems():
+      for tree, score in list(scored_nbest.items()):
         nbests[i][tree] += score
 
   for nbest in nbests:
-    print sorted(nbest, key=nbest.get)[0]
+    print((sorted(nbest, key=nbest.get)[0]))

@@ -8,6 +8,6 @@ if __name__ == '__main__':
   for line in fileinput.input():
     tokens = Tree(line).tokens()
     nbest = rrp.parse(tokens)
-    print len(nbest)
+    print((len(nbest)))
     for tree in nbest:
-      print tree.ptb_parse
+      print((tree.ptb_parse))

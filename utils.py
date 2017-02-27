@@ -70,7 +70,7 @@ class PTBModel(object):
     grads, _ = tf.clip_by_global_norm(tf.gradients(cost, tvars),
                                       config.max_grad_norm)
     optimizer = tf.train.GradientDescentOptimizer(self.lr)
-    self._train_op = optimizer.apply_gradients(zip(grads, tvars))
+    self._train_op = optimizer.apply_gradients(list(zip(grads, tvars)))
 
   def assign_lr(self, session, lr_value):
     session.run(tf.assign(self.lr, lr_value))
@@ -108,17 +108,17 @@ def _build_vocab(filename):
   data = _read_words(filename)
 
   counter = collections.Counter(data)
-  count_pairs = sorted(counter.items(), key=lambda x: (-x[1], x[0]))
+  count_pairs = sorted(list(counter.items()), key=lambda x: (-x[1], x[0]))
 
   words, _ = list(zip(*count_pairs))
-  word_to_id = dict(zip(words, range(len(words))))
+  word_to_id = dict(list(zip(words, list(range(len(words))))))
 
   return word_to_id
 
 
 def _read_words(filename):
   with open_file(filename) as f:
-    return f.read().replace('\n', '<eos>').split()
+    return f.read().decode('utf-8').replace('\n', '<eos>').split()
   
 
 def chop(data, eos):
@@ -165,8 +165,8 @@ def ptb_iterator2(raw_data, batch_size, num_steps, idx2tree, eos):
   dummy2 = (-1, -1)
   remainder = len(raw_data) % batch_size
   if remainder != 0:
-    raw_data = raw_data + [dummy1 for x in xrange(batch_size - remainder)]
-    idx2tree = idx2tree + [dummy2 for x in xrange(batch_size - remainder)]
+    raw_data = raw_data + [dummy1 for x in range(batch_size - remainder)]
+    idx2tree = idx2tree + [dummy2 for x in range(batch_size - remainder)]
   raw_data = np.array(raw_data, dtype=np.int32)
 
   data_len = len(raw_data)
@@ -186,7 +186,7 @@ def ptb_iterator2(raw_data, batch_size, num_steps, idx2tree, eos):
                   dtype=np.dtype('int, int'))
   for i in range(batch_size):
     tree[i, :batch_len] = idx2tree[batch_len * i:batch_len * (i + 1)]
-    tree[i, batch_len:] = [dummy2 for x in xrange(num_steps - remainder)]
+    tree[i, batch_len:] = [dummy2 for x in range(num_steps - remainder)]
 
   epoch_size = (batch_len + num_steps - remainder) // num_steps
 
@@ -230,9 +230,9 @@ def run_epoch(session, m, data, eval_op, verbose=False):
     iters += m.num_steps
 
     if verbose and step % (epoch_size // 10) == 10:
-      print("%.3f perplexity: %.3f speed: %.0f wps" %
+      print(("%.3f perplexity: %.3f speed: %.0f wps" %
             (step * 1.0 / epoch_size, np.exp(costs / iters),
-             iters * m.batch_size / (time.time() - start_time)))
+             iters * m.batch_size / (time.time() - start_time))))
 
   return np.exp(costs / iters)
 
@@ -289,19 +289,19 @@ def run_epoch2(session, m, nbest, eval_op, eos, verbose=False):
       loss[tree_idx[0]][tree_idx[1]] += cost[idx[0]][idx[1]]
               
     if verbose and step % (epoch_size // 10) == 10:
-      print("%.3f perplexity: %.3f speed: %.0f wps" %
+      print(("%.3f perplexity: %.3f speed: %.0f wps" %
             (step * 1.0 / epoch_size, np.exp(costs / iters),
-             iters * m.batch_size / (time.time() - start_time)))
+             iters * m.batch_size / (time.time() - start_time))))
 
   scores = nbest['scores']
   num = 0
   gold, test, matched = 0, 0, 0
   bad = []
-  for i in xrange(len(scores)):
+  for i in range(len(scores)):
     good = True
     ag = 0
     min_val = 10000000
-    for j in xrange(len(scores[i])):
+    for j in range(len(scores[i])):
       if counts[i][j] != 0:
         bad.append(i)
         good = False
@@ -315,7 +315,7 @@ def run_epoch2(session, m, nbest, eval_op, eos, verbose=False):
       test += scores[i][ag]['test']
       matched += scores[i][ag]['matched']
   if bad:
-    print('bad: %s' % ', '.join([str(x) for x in bad]))
+    print(('bad: %s' % ', '.join([str(x) for x in bad])))
   return 200. * matched / (gold + test), num
 
 
@@ -349,7 +349,7 @@ def unkify(ws):
   elif ws[sz-1:sz+1] == 'al':
     uk = uk + 'al'
   else:
-    for i in xrange(sz):
+    for i in range(sz):
       if ws[i] == '-':
         uk = uk + '-'
         break
@@ -365,8 +365,8 @@ def nbest_iterator(raw_data, batch_size, num_steps, idx2tree, eos):
   dummy2 = (-1, -1)
   remainder = len(raw_data) % batch_size
   if remainder != 0:
-    raw_data = raw_data + [dummy1 for x in xrange(batch_size - remainder)]
-    idx2tree = idx2tree + [dummy2 for x in xrange(batch_size - remainder)]
+    raw_data = raw_data + [dummy1 for x in range(batch_size - remainder)]
+    idx2tree = idx2tree + [dummy2 for x in range(batch_size - remainder)]
   raw_data = np.array(raw_data, dtype=np.int32)
 
   data_len = len(raw_data)
@@ -386,7 +386,7 @@ def nbest_iterator(raw_data, batch_size, num_steps, idx2tree, eos):
                   dtype=np.dtype('int, int'))
   for i in range(batch_size):
     tree[i, :batch_len] = idx2tree[batch_len * i:batch_len * (i + 1)]
-    tree[i, batch_len:] = [dummy2 for x in xrange(num_steps - remainder)]
+    tree[i, batch_len:] = [dummy2 for x in range(num_steps - remainder)]
 
   epoch_size = (batch_len + num_steps - remainder) // num_steps
 

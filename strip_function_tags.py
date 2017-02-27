@@ -5,4 +5,4 @@ for line in fileinput.input():
 	tree = Tree(line[:-1])
 	for subtree in tree.all_subtrees():
 		subtree.label_suffix = ''
-	print tree
+	print(tree)

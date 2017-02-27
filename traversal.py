@@ -8,12 +8,12 @@ def generate_nbest(f):
   nbest = []
   count = 0
   for line in f:
-    line = line[:-1]
+    line = line[:-1].decode("utf-8")
     if line == '':
       continue
     if count == 0: # the very first
       count = int(line.split()[0])
-    elif line.startswith('('):
+    elif str(line).startswith('('):
       nbest.append({'ptb': line})
       count -= 1
       if count == 0:
@@ -64,13 +64,13 @@ def remove_duplicates(nbest):
 
 if __name__ == '__main__':
   if len(sys.argv) != 3 and len(sys.argv) != 4:
-    print 'usage: python traversal.py vocab.gz gold.gz [nbest.gz]'
+    print('usage: python traversal.py vocab.gz gold.gz [nbest.gz]')
     sys.exit(0)
 
   words = read_vocab(sys.argv[1])
   if len(sys.argv) == 3:
     for line in open_file(sys.argv[2]):
-      print ptb(line[:-1], words)
+      print(ptb(line[:-1].decode("utf-8"), words))
   else:
     rrp = RerankingParser()
     parser = 'wsj/WSJ-PTB3/parser'
@@ -80,9 +80,9 @@ if __name__ == '__main__':
       for tree in nbest:
         tree['seq'] = ptb(tree['ptb'], words)
       nbest = remove_duplicates(nbest)
-      gold = Tree(gold)
-      print len(nbest)
+      gold = Tree(gold.decode("utf-8"))
+      print(len(nbest))
       for t in nbest:
         scores = Tree(t['ptb']).evaluate(gold)
-        print scores['gold'], scores['test'], scores['matched']
-        print t['seq']
+        print(scores['gold'], scores['test'], scores['matched'])
+        print(t['seq'])

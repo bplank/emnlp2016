@@ -1,4 +1,4 @@
-from __future__ import absolute_import, division, print_function
+
 from random import shuffle
 from utils import MediumConfig, PTBModel, chop, run_epoch, run_epoch2
 
@@ -6,7 +6,7 @@ from utils import ptb_iterator, nbest_iterator
 
 import itertools, sys, time
 
-import cPickle as pickle
+import pickle as pickle
 import numpy as np
 import tensorflow as tf
 
@@ -123,12 +123,12 @@ def train():
       sys.stdout.flush()
 
       start_time = time.time()
-      for k in xrange(config.silver):
+      for k in range(config.silver):
         try:
-          silver_data = silver_generator.next()
+          silver_data = next(silver_generator)
         except:
           silver_generator = reader.file_to_word_ids3(silver_path)
-          silver_data = silver_generator.next()
+          silver_data = next(silver_generator)
         j += 1
         silver_data = chop(silver_data, vocab['<eos>'])
         shuffle(silver_data)
